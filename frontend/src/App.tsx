@@ -17,7 +17,7 @@ function App() {
     }
 
     const formData = new FormData();
-    formData.append('image', image);
+    formData.append('upload_file', image);
 
     console.log('send file to backend', image);
     try {
@@ -28,7 +28,7 @@ function App() {
 
       const data = await response.json();
 
-      setResult(data.data.classification);
+      setResult(data.data.prediction);
     } catch (error) {
       console.error('Error:', error);
     }
