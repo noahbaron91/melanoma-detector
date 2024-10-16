@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from fastai.vision.all import load_learner
 import pickle
 
 app = Flask(__name__)
+CORS(app) 
 
 
 def get_x(r):
