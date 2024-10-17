@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import './App.css';
+import { config } from './config';
 
 function App() {
   const [image, setImage] = useState<File | null>(null);
@@ -21,7 +22,7 @@ function App() {
 
     console.log('send file to backend', image);
     try {
-      const response = await fetch('http://127.0.0.1:5001/predict', {
+      const response = await fetch(`${config.backendURL}/predict`, {
         method: 'POST',
         body: formData,
       });
