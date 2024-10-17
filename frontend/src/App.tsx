@@ -44,6 +44,13 @@ function App() {
 
   return (
     <form onSubmit={handleSubmit}>
+      <h1 style={{ fontSize: 24 }}>
+        THIS IS JUST FOR EXPERIMENTAL PURPOSES MADE BY A STUDENT.
+        <br />
+        <u>DO NOT TAKE THESE RESULTS SERIOUSLY.</u>
+        <br />
+        PLEASE GO VISIT A DOCTOR.
+      </h1>
       <input type='file' onChange={handleFileChange} />
       <button type='submit'>Submit</button>
       {typeof result === 'string' && <p>Type: {result}</p>}
