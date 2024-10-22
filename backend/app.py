@@ -4,6 +4,7 @@ from torchvision.models import resnet50, ResNet50_Weights
 from PIL import Image
 from flask_cors import CORS
 import io
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -27,7 +28,7 @@ def load_model():
     # Replace final layer
     model.fc = torch.nn.Linear(2048, 4)
     
-    model.load_state_dict(torch.load('./models/10k-images.pth', map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load('./models/10k-images.pth', map_location=torch.device('cpu'), weights_only=True))
     model.to(device)
     model.eval()
     
@@ -76,6 +77,6 @@ def predict():
             }), 500
 
 if __name__ == '__main__':
-    # For development
-    app.run(host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port)
     
