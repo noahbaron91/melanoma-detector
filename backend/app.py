@@ -65,7 +65,8 @@ def predict():
             pred_label_idx = torch.argmax(probabilities, dim=1).item()    
             
             return jsonify({
-                'prediction': pred_label_idx,
+                'classification': pred_label_idx,
+                'confidence': probabilities[0][pred_label_idx].item(),
                 'success': True
             })
             

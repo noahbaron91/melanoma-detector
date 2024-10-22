@@ -2,10 +2,37 @@ import { useState } from 'react';
 import './App.css';
 import { config } from './config';
 
+type Prediction =
+  | 'Benign'
+  | 'Malignant'
+  | 'Indeterminate / Benign'
+  | 'Indeterminate / Malignant';
+
+const getLabelFromClassification = (type: number): Prediction | null => {
+  switch (type) {
+    case 0: {
+      return 'Benign';
+    }
+    case 1: {
+      return 'Malignant';
+    }
+    case 2: {
+      return 'Indeterminate / Benign';
+    }
+    case 3: {
+      return 'Indeterminate / Malignant';
+    }
+    default: {
+      return null;
+    }
+  }
+};
+
 function App() {
   const [image, setImage] = useState<File | null>(null);
 
-  const [result, setResult] = useState<number | null>(null);
+  const [classification, setClassification] = useState<number | null>(null);
+  const [confidence, setConfidence] = useState<number | null>(null);
 
   const handleSubmit: React.DOMAttributes<HTMLFormElement>['onSubmit'] = async (
     event
@@ -28,8 +55,9 @@ function App() {
       });
 
       const data = await response.json();
-      console.log(data.prediction);
-      setResult(data.prediction);
+
+      setClassification(data.classification);
+      setConfidence(data.confidence);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -54,7 +82,12 @@ function App() {
       </h1>
       <input type='file' onChange={handleFileChange} />
       <button type='submit'>Submit</button>
-      {typeof result === 'number' && <p>Type: {result}</p>}
+      {typeof classification === 'number' && (
+        <p>Type: {getLabelFromClassification(classification)}</p>
+      )}
+      {typeof confidence === 'number' && (
+        <p>Confidence: {Math.round(confidence * 100)}%</p>
+      )}
     </form>
   );
 }
