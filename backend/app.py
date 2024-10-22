@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 import torch
-import torchvision.transforms as transforms
 from torchvision.models import resnet50, ResNet50_Weights
 from PIL import Image
 from flask_cors import CORS
@@ -13,6 +12,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = None
 transform = None
 
+# todo: process .webp images
 def load_model():
     global model, transform
     
@@ -73,5 +73,5 @@ def predict():
 
 if __name__ == '__main__':
     # For development
-    app.run(host='0.0.0.0', port=5001)
+    app.run(host='0.0.0.0', port=5000)
     
