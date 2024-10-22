@@ -1,89 +1,77 @@
-import bentoml
+from flask import Flask, request, jsonify
 import torch
-import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, models
-import pandas as pd
+import torchvision.transforms as transforms
+from torchvision.models import resnet50, ResNet50_Weights
 from PIL import Image
-import os
 from flask_cors import CORS
-from flask import Flask, request, current_app
-from werkzeug.utils import secure_filename
-import tempfile
-import gdown
-
-
-def load_model():
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.pth') as temp_file:
-        temp_path = temp_file.name
-
-        model = models.resnet18(pretrained=True)
-        num_ftrs = model.fc.in_features
-        model.fc = nn.Linear(num_ftrs, 4)
-
-        # Download the model from Google Drive
-        file_id = '1--vYcqyH-WSJl52gd-8NHFBq7l-VxM7C'
-        url = f'https://drive.google.com/uc?id={file_id}'
-        gdown.download(url, temp_path, quiet=False)
-
-        model.load_state_dict(torch.load(temp_path))
-   
-        return model
-
-transform = transforms.Compose([
-    transforms.RandomResizedCrop(128, scale=(0.35, 1.0)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-])
-
-def predict(model, image_path):
-    model.eval()
-    image = Image.open(image_path).convert('RGB')
-    image = transform(image).unsqueeze(0)
-
-    with torch.no_grad():
-        output = model(image)
-        _, predicted = torch.max(output, 1)
-
-    label_map_inverse = {
-        0: 'benign',
-        1: 'malignant',
-        2: 'indeterminate/benign',
-        3: 'indeterminate/malignant'
-    }
-    return label_map_inverse[predicted.item()]
-
-loaded_model = load_model()
+import io
 
 app = Flask(__name__)
-CORS(app) 
+CORS(app)
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = None
+transform = None
+
+def load_model():
+    global model, transform
+    
+    # Load model architecture
+    weights = ResNet50_Weights.DEFAULT
+    model = resnet50(weights=weights)
+    
+    # Freeze parameters
+    for param in model.parameters():
+        param.requires_grad = False
+        
+    # Replace final layer
+    model.fc = torch.nn.Linear(2048, 4)
+    
+    model.load_state_dict(torch.load('../models/10k-images.pth', map_location=torch.device('cpu')))
+    model.to(device)
+    model.eval()
+    
+    transform = weights.transforms()
+
+load_model()
 
 @app.route('/predict', methods=['POST'])
-def predictRoute():
-    print('Request received')
-    image = request.files['upload_file']
+def predict():
+    if request.method == 'POST':
+        print("0")
 
-    upload_dir = os.path.join(current_app.root_path, 'uploads')
-    os.makedirs(upload_dir, exist_ok=True)
-    
-    # Generate a unique filename
-    filename = secure_filename(image.filename)
-    
-    # Save the file
-    file_path = os.path.join(upload_dir, filename)
-    image.save(file_path)
+        if 'image' not in request.files:
+            return jsonify({'error': 'No image provided'}), 400
+            
+        try:
+            # Read image
+            image_file = request.files['image']
+            image_bytes = image_file.read()
+            image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
 
-    print(f'File saved to {file_path}')
-    prediction = predict(loaded_model, file_path)
-    print(f"Prediction: {prediction}")
-    
-    return {'success': True, 'data': {'prediction': prediction}}
-
-@app.route('/health', methods=['GET'])
-def health():
-    return 'OK', 200
-
+            # Preprocess
+            image_tensor = transform(image).unsqueeze(0).to(device)
+            
+            # Get prediction
+            with torch.no_grad():
+                outputs = model(image_tensor)
+                probabilities = torch.nn.functional.softmax(outputs, dim=1)
+                
+            pred_label_idx = torch.argmax(probabilities, dim=1).item()    
+            
+            return jsonify({
+                'prediction': pred_label_idx,
+                'success': True
+            })
+            
+        except Exception as e:
+            print(e)
+            return jsonify({
+                'error': str(e),
+                'success': False
+            }), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
-
+    # For development
+    app.run(host='0.0.0.0', port=5001)
+    

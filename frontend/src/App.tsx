@@ -5,7 +5,7 @@ import { config } from './config';
 function App() {
   const [image, setImage] = useState<File | null>(null);
 
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<number | null>(null);
 
   const handleSubmit: React.DOMAttributes<HTMLFormElement>['onSubmit'] = async (
     event
@@ -18,7 +18,7 @@ function App() {
     }
 
     const formData = new FormData();
-    formData.append('upload_file', image);
+    formData.append('image', image);
 
     console.log('send file to backend', image);
     try {
@@ -28,8 +28,8 @@ function App() {
       });
 
       const data = await response.json();
-
-      setResult(data.data.prediction);
+      console.log(data.prediction);
+      setResult(data.prediction);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -54,7 +54,7 @@ function App() {
       </h1>
       <input type='file' onChange={handleFileChange} />
       <button type='submit'>Submit</button>
-      {typeof result === 'string' && <p>Type: {result}</p>}
+      {typeof result === 'number' && <p>Type: {result}</p>}
     </form>
   );
 }
