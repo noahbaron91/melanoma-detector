@@ -35,6 +35,10 @@ def load_model():
 
 load_model()
 
+@app.route('/health')
+def health():
+    return "OK", 200
+
 @app.route('/predict', methods=['POST'])
 def predict():
     if request.method == 'POST':
