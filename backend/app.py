@@ -5,6 +5,7 @@ from PIL import Image
 from flask_cors import CORS
 import io
 import os
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -76,6 +77,45 @@ def predict():
                 'error': str(e),
                 'success': False
             }), 500
+
+
+@app.route('/predict-url', methods=['POST'])
+def predict_url():
+    if request.method == 'POST':
+
+        if "url" not in request.json:
+            return jsonify({'error': 'No image URL provided', 'success': False}), 400
+        
+        
+        url = request.json['url']
+
+        try:
+            # Download image from URL
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()  # Raises an HTTPError for bad responses (4xx, 5xx)
+
+            image = Image.open(io.BytesIO(response.content)).convert('RGB')
+            
+            # Preprocess
+            image_tensor = transform(image).unsqueeze(0).to(device)
+            
+            # Get prediction
+            with torch.no_grad():
+                outputs = model(image_tensor)
+                probabilities = torch.nn.functional.softmax(outputs, dim=1)
+                
+            pred_label_idx = torch.argmax(probabilities, dim=1).item()    
+            
+            return jsonify({
+                'classification': pred_label_idx,
+                'confidence': probabilities[0][pred_label_idx].item(),
+                'success': True
+            })
+            
+
+        except:
+            return jsonify({'error': 'Could not download image from URL', 'success': False}), 400
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))

@@ -180,37 +180,39 @@ const HOST = 'https://melanoma-static.nbaron.com';
 function MelanomaSampleTest({ sampleCase }: { sampleCase: Case }) {
   const src = `${HOST}/${sampleCase.key}.jpg`;
 
+  const [classification, setClassification] = useState<number | null>(null);
+  const [confidence, setConfidence] = useState<number | null>(null);
+
   const handleTestModel = async () => {
-    const response = await fetch(src);
-    const imageBlob = await response.blob();
-
-    const formData = new FormData();
-    formData.append('image', imageBlob);
-
-    await fetch(`${config.backendURL}/predict`, {
+    const response = await fetch(`${config.backendURL}/predict-url`, {
       method: 'POST',
-      body: formData,
+      body: JSON.stringify({ url: src }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
+
+    const data = await response.json();
+    console.log(data.classification);
+
+    setClassification(data.classification);
+    setConfidence(data.confidence);
   };
 
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
-        <img
-          src={src}
-          style={{ aspectRatio: 1 / 1, background: 'gray' }}
-          loading='eager'
-        />
+        <img src={src} className='aspect-square bg-gray-700' loading='eager' />
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className='fixed top-0 left-0 right-0 bottom-0 bg-black opacity-30' />
         <Dialog.Content
           aria-describedby={undefined}
-          className='px-6 py-10 fixed bg-[#003DC4] flex flex-col gap-7 top-1/2 left-3 right-3 rounded-2xl text-white -translate-y-1/2'
+          className='px-10 py-10 fixed bg-[#003DC4] sm:max-w-sm sm:left-1/2 sm:-translate-x-1/2 flex flex-col gap-7 top-1/2 left-3 right-3 rounded-2xl text-white -translate-y-1/2'
         >
           <div className='flex justify-between items-center'>
-            <Dialog.Title className='text-2xl font-semibold'>
-              Actual: Benign
+            <Dialog.Title className='text-xl'>
+              Actual: {getLabelFromClassification(sampleCase.trueLabel)}
             </Dialog.Title>
             <Dialog.Close>
               <CloseIcon />
@@ -219,15 +221,23 @@ function MelanomaSampleTest({ sampleCase }: { sampleCase: Case }) {
           <img className='rounded w-full aspect-square' src={src} />
           <div className='flex flex-col'>
             <p className=''>Prediction:</p>
-            <p className='font-bold'>Start test to get results</p>
+            {typeof classification === 'number' ? (
+              <p>{getLabelFromClassification(classification)}</p>
+            ) : (
+              <p className='font-semibold'>Start test to get results</p>
+            )}
           </div>
           <div className='flex flex-col'>
             <p>Confidence:</p>
-            <p className='font-bold'>Start test to get results</p>
+            {typeof confidence === 'number' ? (
+              <p>{(confidence * 100).toFixed(2)}%</p>
+            ) : (
+              <p className='font-semibold'>Start test to get results</p>
+            )}
           </div>
           <button
             onClick={handleTestModel}
-            className='py-4 bg-[#00277C] rounded-lg'
+            className='py-3 bg-[#00277C] rounded-2xl'
           >
             Test model
           </button>
@@ -242,6 +252,7 @@ function App() {
 
   const [classification, setClassification] = useState<number | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const handleUploadImage: React.InputHTMLAttributes<HTMLInputElement>['onChange'] =
     async (event) => {
@@ -265,6 +276,7 @@ function App() {
 
         setClassification(data.classification);
         setConfidence(data.confidence);
+        setPreviewUrl(URL.createObjectURL(file));
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -318,6 +330,12 @@ function App() {
         {classification !== null && confidence !== null ? (
           <>
             <div className='flex flex-col gap-2 w-[440px] text-center'>
+              {previewUrl && (
+                <img
+                  src={previewUrl}
+                  className='rounded-lg w-full aspect-square'
+                />
+              )}
               <p className='text-white font-bold'>
                 Prediction: {getLabelFromClassification(classification)}
               </p>
