@@ -8,6 +8,13 @@ type Prediction =
   | 'Indeterminate / Benign (Follow up recommended)'
   | 'Indeterminate / Malignant (Further testing recommended)';
 
+enum Classification {
+  Benign,
+  Malignant,
+  IndeterminateBenign,
+  IndeterminateMalignant,
+}
+
 const getLabelFromClassification = (type: number): Prediction | null => {
   switch (type) {
     case 0: {
@@ -64,14 +71,137 @@ function CloseIcon() {
   );
 }
 
-function MelanomaSampleTest({ src }: { src: string }) {
-  const handleTestModel = () => {
-    console.log('test model');
+type Case = {
+  key: string;
+  trueLabel: number;
+};
+
+const cases: Case[] = [
+  {
+    key: 'ISIC_0851414',
+    trueLabel: Classification.IndeterminateMalignant,
+  },
+  {
+    key: 'ISIC_1136887',
+    trueLabel: Classification.Benign,
+  },
+  {
+    key: 'ISIC_2222766',
+    trueLabel: Classification.Malignant,
+  },
+  {
+    key: 'ISIC_2691236',
+    trueLabel: Classification.Benign,
+  },
+  {
+    key: 'ISIC_2792717',
+    trueLabel: Classification.Malignant,
+  },
+  {
+    key: 'ISIC_3640885',
+    trueLabel: Classification.Benign,
+  },
+  {
+    key: 'ISIC_4747370',
+    trueLabel: Classification.IndeterminateMalignant,
+  },
+  {
+    key: 'ISIC_5574004',
+    trueLabel: Classification.Benign,
+  },
+  {
+    key: 'ISIC_6202682',
+    trueLabel: Classification.Benign,
+  },
+  {
+    key: 'ISIC_6364782',
+    trueLabel: Classification.Malignant,
+  },
+  {
+    key: 'ISIC_6720909',
+    trueLabel: Classification.Malignant,
+  },
+  {
+    key: 'ISIC_6929321',
+    trueLabel: Classification.Benign,
+  },
+  {
+    key: 'ISIC_7239167',
+    trueLabel: Classification.Benign,
+  },
+  {
+    key: 'ISIC_7288606',
+    trueLabel: Classification.Benign,
+  },
+  {
+    key: 'ISIC_7365059',
+    trueLabel: Classification.IndeterminateMalignant,
+  },
+  {
+    key: 'ISIC_7428145',
+    trueLabel: Classification.Benign,
+  },
+  {
+    key: 'ISIC_8476601',
+    trueLabel: Classification.Benign,
+  },
+  {
+    key: 'ISIC_8738186',
+    trueLabel: Classification.IndeterminateMalignant,
+  },
+  {
+    key: 'ISIC_8801733',
+    trueLabel: Classification.Benign,
+  },
+  {
+    key: 'ISIC_8999351',
+    trueLabel: Classification.IndeterminateMalignant,
+  },
+  {
+    key: 'ISIC_9182038',
+    trueLabel: Classification.Benign,
+  },
+  {
+    key: 'ISIC_9498324',
+    trueLabel: Classification.Benign,
+  },
+  {
+    key: 'ISIC_9600126',
+    trueLabel: Classification.Benign,
+  },
+  {
+    key: 'ISIC_9973437',
+    trueLabel: Classification.Benign,
+  },
+];
+
+const HOST = 'https://melanoma-static.nbaron.com';
+
+function MelanomaSampleTest({ sampleCase }: { sampleCase: Case }) {
+  const src = `${HOST}/${sampleCase.key}.jpg`;
+
+  const handleTestModel = async () => {
+    const response = await fetch(src);
+    const imageBlob = await response.blob();
+
+    const formData = new FormData();
+    formData.append('image', imageBlob);
+
+    await fetch(`${config.backendURL}/predict`, {
+      method: 'POST',
+      body: formData,
+    });
   };
 
   return (
     <Dialog.Root>
-      <Dialog.Trigger className='h-72 bg-white'></Dialog.Trigger>
+      <Dialog.Trigger asChild>
+        <img
+          src={src}
+          style={{ aspectRatio: 1 / 1, background: 'gray' }}
+          loading='eager'
+        />
+      </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className='fixed top-0 left-0 right-0 bottom-0 bg-black opacity-30' />
         <Dialog.Content
@@ -86,10 +216,7 @@ function MelanomaSampleTest({ src }: { src: string }) {
               <CloseIcon />
             </Dialog.Close>
           </div>
-          <img
-            className='rounded w-full aspect-square'
-            src='https://content.isic-archive.com/3a943f28-4c9a-47ba-8dac-3178c844de05/027b1919-6520-4f49-ab0a-99bf6bed4737.jpg?Expires=1730160000&Signature=vb8dyvK~KvOVlr7ymxyqMaLB4evrdo8jyzJC-KWsM-FL3UCC33QPWQ3yi8dQnrrO3L0xY45EWuT6~mECx-rJwd9YKJZQfm2nQcb7uBjqFn0A~5aGGhu1jTNfjKhcxbWmU6vGLTDRDboBOqvElihM~YlnKsnwi-ekvk9pTD0SC24dS-Nd0eyj7cz0pgEHCHizq~PGvmrnzRDpGGpqhiyQz~tuRsk5syuJecr1097JL28qbIJuDGmxX9Vj4BRmMtYYh7FDii-TDZN4gtE2MM2Atm4CIYgtvjujNpOIvm4UkiUmKi059x8f1lBLkzblxB-gvjHIJeZoX5uX9yn356IxRg__&Key-Pair-Id=K1C8I6SNK7JVJ8'
-          />
+          <img className='rounded w-full aspect-square' src={src} />
           <div className='flex flex-col'>
             <p className=''>Prediction:</p>
             <p className='font-bold'>Start test to get results</p>
@@ -110,42 +237,7 @@ function MelanomaSampleTest({ src }: { src: string }) {
   );
 }
 
-// const useImages = () => {
-//   const [images, setImages] = useState<string[]>([]);
-
-//   const randomizeImages = () => {
-//     console.log('randomize images');
-//   };
-
-//   const getImages = async () => {
-//     try {
-//       const numOfImages = await fetch(
-//         'https://api.isic-archive.com/api/v2/stats/'
-//       );
-
-//       const imagesData = await numOfImages.json();
-//       const numberOfPublicImages = imagesData.image.public_images_count;
-
-//       console.log(numberOfPublicImages);
-//       return numberOfPublicImages;
-//     } catch (error) {
-//       console.error('Error fetching images', error);
-//     }
-//   };
-
-//   useEffect(() => {
-//     getImages().then((images) => {
-//       setImages(images);
-//     });
-//   }, []);
-
-//   return { images, randomizeImages };
-// };
-
 function App() {
-  const [image, setImage] = useState<File | null>(null);
-  // const { images, randomizeImages } = useImages();
-
   const uploadImagesRef = useRef<HTMLInputElement>(null);
 
   const [classification, setClassification] = useState<number | null>(null);
@@ -175,37 +267,10 @@ function App() {
         setConfidence(data.confidence);
       } catch (error) {
         console.error('Error:', error);
+      } finally {
+        uploadImagesRef.current!.value = '';
       }
     };
-
-  // const handleSubmit: React.DOMAttributes<HTMLFormElement>['onSubmit'] = async (
-  //   event
-  // ) => {
-  //   event.preventDefault();
-
-  //   if (!image) {
-  //     console.error('No image selected');
-  //     return;
-  //   }
-
-  //   const formData = new FormData();
-  //   formData.append('image', image);
-
-  //   console.log('send file to backend', image);
-  //   try {
-  //     const response = await fetch(`${config.backendURL}/predict`, {
-  //       method: 'POST',
-  //       body: formData,
-  //     });
-
-  //     const data = await response.json();
-
-  //     setClassification(data.classification);
-  //     setConfidence(data.confidence);
-  //   } catch (error) {
-  //     console.error('Error:', error);
-  //   }
-  // };
 
   const handleClickUploadImage = () => {
     uploadImagesRef.current?.click();
@@ -214,11 +279,11 @@ function App() {
   return (
     <div className='mx-7 my-7'>
       <p className='text-white text-xl'>nbaron</p>
-      <div className='flex flex-col gap-4 mt-16'>
-        <h1 className='text-4xl text-white font-semibold'>
-          Using AI to detect skin cancer
+      <div className='flex flex-col gap-4 mt-16 md:gap-7'>
+        <h1 className='text-4xl text-white sm:text-5xl font-semibold sm:text-center md:text-5xl'>
+          Using AI to Detect Skin Cancer
         </h1>
-        <div className='flex flex-col gap-4'>
+        <div className='flex flex-col gap-4 sm:text-center md:text-xl'>
           <p className='text-white'>
             Each year 8,290 people die from Melanoma Skin Cancer
             <a
@@ -235,69 +300,95 @@ function App() {
             <a
               className='underline'
               href='https://www.skincancer.org/skin-cancer-information/skin-cancer-facts/'
+              target='_blank'
             >
               ²
             </a>
           </p>
         </div>
       </div>
-      <div className='my-3'>
-        <input
-          type='file'
-          accept='image/*'
-          className='text-white invisible'
-          ref={uploadImagesRef}
-          onChange={handleUploadImage}
-        />
-        <div className='flex flex-col gap-3'>
-          {classification !== null && confidence !== null ? (
-            <div className='flex flex-col gap-2'>
-              <p className='text-white'>Prediction:</p>
+      <input
+        type='file'
+        accept='image/*'
+        className='text-white invisible absolute -z-10 -top-full -left-full'
+        ref={uploadImagesRef}
+        onChange={handleUploadImage}
+      />
+      <div className='flex flex-col gap-3 mt-7 items-center'>
+        {classification !== null && confidence !== null ? (
+          <>
+            <div className='flex flex-col gap-2 w-[440px] text-center'>
               <p className='text-white font-bold'>
-                {getLabelFromClassification(classification)}
+                Prediction: {getLabelFromClassification(classification)}
               </p>
               <p className='text-white'>
                 Confidence: {(confidence * 100).toFixed(2)}%
               </p>
-              <button className='text-white bg-[#00277C] w-full py-4 rounded-lg'>
-                Try another
-              </button>
             </div>
-          ) : (
             <button
-              className='text-white bg-[#00277C] w-full py-4 rounded-lg'
+              className='text-white bg-[#00277C] sm:max-w-72 sm:text-md mx-auto w-full py-3 rounded-3xl'
               onClick={handleClickUploadImage}
             >
-              Upload test image
+              Try another
             </button>
-          )}
+          </>
+        ) : (
+          <button
+            className='text-white bg-[#00277C] sm:max-w-72 sm:text-md mx-auto w-full py-3 rounded-3xl'
+            onClick={handleClickUploadImage}
+          >
+            Upload test image
+          </button>
+        )}
 
-          <p className='text-gray-200 text-left text-sm'>
-            This is only for educational purposes, and should not be used as a
-            replacement for medical care
+        <p className='text-gray-200 text-left sm:text-center max-w-[400px]'>
+          This is only for educational purposes, and should not be used as a
+          replacement for medical care
+        </p>
+      </div>
+      <div className='text-white flex flex-col mt-12 gap-3 lg:mx-36'>
+        <div className='flex flex-col gap-2 my-3'>
+          <p className='font-medium text-2xl'>Test a sample image</p>
+          <p>
+            Randomly selected images from{' '}
+            <a
+              className='underline'
+              href='https://isic-archive.com/'
+              target='_blank'
+            >
+              ISIC
+            </a>{' '}
+            that were not included in the training set
           </p>
         </div>
-      </div>
-      <div className='text-white flex flex-col mt-12 gap-3'>
-        <div className='flex flex-col gap-2 my-3'>
-          <p className='font-medium text-2xl'>Test an image on our AI model</p>
-          <p>These images were never seen during training</p>
-        </div>
-        <div className='flex flex-col gap-1'>
-          <MelanomaSampleTest src='' />
-          <MelanomaSampleTest src='' />
-          <MelanomaSampleTest src='' />
-          <MelanomaSampleTest src='' />
+        <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
+          {cases.map((_, index) => {
+            const currentCase = cases[index];
+            if (!currentCase) return null;
+
+            return <MelanomaSampleTest key={index} sampleCase={currentCase} />;
+          })}
         </div>
       </div>
 
-      <a
-        target='_blank'
-        href='https://github.com/noahbaron91/melanoma-detector'
-        className='rounded-full w-12 h-12 mt-6 block'
-      >
-        <GitHubIcon />
-      </a>
+      <div className='flex flex-col sm:flex-row gap-5 sm:items-end justify-between mt-12'>
+        <p className='text-gray-200 text-left sm:text-center'>
+          Trained on 100,000 images from the{' '}
+          <a
+            href='https://www.isic-archive.com/'
+            className='underline'
+            target='_blank'
+          >
+            ISIC dataset
+          </a>
+        </p>
+        <a
+          target='_blank'
+          href='https://github.com/noahbaron91/melanoma-detector'
+        >
+          <GitHubIcon />
+        </a>
+      </div>
     </div>
   );
 }
