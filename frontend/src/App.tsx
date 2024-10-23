@@ -174,21 +174,29 @@ function MelanomaSampleTest({ sampleCase }: { sampleCase: Case }) {
 
   const [classification, setClassification] = useState<number | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleTestModel = async () => {
-    const response = await fetch(`${config.backendURL}/predict-url`, {
-      method: 'POST',
-      body: JSON.stringify({ url: src }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    setIsLoading(true);
 
-    const data = await response.json();
-    console.log(data.classification);
+    try {
+      const response = await fetch(`${config.backendURL}/predict-url`, {
+        method: 'POST',
+        body: JSON.stringify({ url: src }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-    setClassification(data.classification);
-    setConfidence(data.confidence);
+      const data = await response.json();
+
+      setClassification(data.classification);
+      setConfidence(data.confidence);
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -235,7 +243,7 @@ function MelanomaSampleTest({ sampleCase }: { sampleCase: Case }) {
             onClick={handleTestModel}
             className='py-3 bg-[#00277C] rounded-2xl'
           >
-            Test model
+            {isLoading ? <p>Loading results...</p> : <p>Test model</p>}
           </button>
         </Dialog.Content>
       </Dialog.Portal>
@@ -249,6 +257,7 @@ function App() {
   const [classification, setClassification] = useState<number | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleUploadImage: React.InputHTMLAttributes<HTMLInputElement>['onChange'] =
     async (event) => {
@@ -261,6 +270,7 @@ function App() {
       formData.append('image', file);
 
       try {
+        setIsLoading(true);
         const endpoint = `${config.backendURL}/predict`;
 
         const response = await fetch(endpoint, {
@@ -276,6 +286,7 @@ function App() {
       } catch (error) {
         console.error('Error:', error);
       } finally {
+        setIsLoading(false);
         uploadImagesRef.current!.value = '';
       }
     };
@@ -294,11 +305,11 @@ function App() {
         nbaron
       </a>
       <div className='flex flex-col gap-4 mt-16 md:gap-7'>
-        <h1 className='text-3xl text-white sm:text-5xl font-semibold sm:text-center md:text-5xl max-w-[800px] !leading-[120%] sm:mx-auto'>
+        <h1 className='text-2xl text-white sm:text-5xl font-semibold sm:text-center md:text-5xl max-w-[800px] !leading-[120%] sm:mx-auto'>
           Detecting Melanoma Skin Cancer Using Machine Learning
         </h1>
-        <div className='flex flex-col gap-4 sm:text-center md:text-xl'>
-          <p className='text-white'>
+        <div className='flex text-white flex-col gap-4 sm:text-center md:text-xl'>
+          <p>
             Each year 8,290 people die from Melanoma Skin Cancer
             <a
               className='underline'
@@ -308,7 +319,7 @@ function App() {
               ¹
             </a>
           </p>
-          <p className='text-white'>
+          <p>
             When detected early, the 5-year survival rate for Melanoma is 99
             percent
             <a
@@ -329,9 +340,17 @@ function App() {
         onChange={handleUploadImage}
       />
       <div className='flex flex-col gap-3 mt-7 items-center'>
+        {isLoading && (
+          <div className='flex flex-col items-center gap-3 my-2'>
+            <div className='loader' />
+            <p className='text-white text-lg font-semibold'>
+              Loading your prediction. This can take up to a minute...
+            </p>
+          </div>
+        )}
         {classification !== null && confidence !== null ? (
           <>
-            <div className='flex flex-col gap-2 w-[440px] text-center'>
+            <div className='flex flex-col gap-2  w-[440px] text-center'>
               {previewUrl && (
                 <img
                   src={previewUrl}
