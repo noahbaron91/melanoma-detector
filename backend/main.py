@@ -50,7 +50,7 @@ load_model()
 
 @app.get('/health')
 def health():
-    return "OK", 200
+    return "OK"
 
 class PredictionResponse(BaseModel):
     success: bool
