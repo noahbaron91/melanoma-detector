@@ -316,8 +316,9 @@ function App() {
     <div className='mx-7 my-7'>
       <p className='text-white text-xl'>nbaron</p>
       <div className='flex flex-col gap-4 mt-16 md:gap-7'>
-        <h1 className='text-3xl text-white sm:text-5xl font-semibold sm:text-center md:text-5xl max-w-[600px] sm:mx-auto'>
-          Detecting Skin Cancer With Machine Learning
+        <h1 className='text-3xl text-white sm:text-5xl font-semibold sm:text-center md:text-5xl max-w-[800px] !leading-[120%] sm:mx-auto'>
+          Detecting Melanoma Skin Cancer With 99.73% Accuracy* Using Machine
+          Learning
         </h1>
         <div className='flex flex-col gap-4 sm:text-center md:text-xl'>
           <p className='text-white'>
@@ -394,7 +395,7 @@ function App() {
             Test a sample image
           </p>
           <p className='text-center'>
-            Randomly selected images from{' '}
+            Test our image using randomly selected images from{' '}
             <a
               className='underline'
               href='https://isic-archive.com/'
@@ -417,13 +418,13 @@ function App() {
 
       <div className='flex flex-col sm:flex-row gap-5 sm:items-end justify-between mt-12'>
         <p className='text-gray-200 text-left sm:text-center'>
-          Trained on 100,000 images from the{' '}
+          *Accuracy based test dataset of 10,000 test images from{' '}
           <a
             href='https://www.isic-archive.com/'
             className='underline'
             target='_blank'
           >
-            ISIC dataset
+            ISIC
           </a>
         </p>
         <a
