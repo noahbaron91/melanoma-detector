@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { config } from './config';
 import * as Dialog from '@radix-ui/react-dialog';
 
@@ -251,7 +251,34 @@ function MelanomaSampleTest({ sampleCase }: { sampleCase: Case }) {
   );
 }
 
+/**
+ * This is a workaround for cold starts with Cloud Run
+ * Instead of waiting for the backend to warm up on the initial request, we can hit the /health endpoint on load
+ */
+const useWarmBackend = () => {
+  const warmBackend = async () => {
+    try {
+      await fetch(`${config.backendURL}/health`);
+    } catch (error) {
+      console.error('Error warming backend:', error);
+    }
+  };
+
+  // Hit it once every minute to keep the backend warm
+  useEffect(() => {
+    const ONE_MINUTE = 1000 * 60;
+
+    const interval = setInterval(warmBackend, ONE_MINUTE);
+
+    warmBackend();
+
+    return () => clearInterval(interval);
+  }, []);
+};
+
 function App() {
+  useWarmBackend();
+
   const uploadImagesRef = useRef<HTMLInputElement>(null);
 
   const [classification, setClassification] = useState<number | null>(null);
