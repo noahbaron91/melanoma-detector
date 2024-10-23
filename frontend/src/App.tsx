@@ -210,7 +210,7 @@ function MelanomaSampleTest({ sampleCase }: { sampleCase: Case }) {
             <Dialog.Title className='text-xl'>
               Actual: {getLabelFromClassification(sampleCase.trueLabel)}{' '}
             </Dialog.Title>
-            <Dialog.Close className='pointer-events-none'>
+            <Dialog.Close className='outline-none'>
               <CloseIcon />
             </Dialog.Close>
           </div>
@@ -324,7 +324,7 @@ function App() {
         nbaron
       </a>
       <div className='flex flex-col gap-4 mt-16 md:gap-7'>
-        <h1 className='text-2xl text-white sm:text-5xl font-semibold sm:text-center md:text-5xl max-w-[800px] !leading-[120%] sm:mx-auto'>
+        <h1 className='text-4xl text-white sm:text-5xl font-semibold sm:text-center md:text-5xl max-w-[800px] !leading-[120%] sm:mx-auto'>
           Detecting Melanoma Skin Cancer Using Machine Learning
         </h1>
         <div className='flex text-white flex-col gap-4 sm:text-center md:text-xl'>
