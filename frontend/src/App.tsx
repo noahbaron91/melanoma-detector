@@ -149,6 +149,14 @@ const cases: Case[] = [
     key: 'ISIC_9498324',
     trueLabel: Classification.Benign,
   },
+  {
+    trueLabel: Classification.Benign,
+    key: 'ISIC_7727119',
+  },
+  {
+    trueLabel: Classification.IndeterminateBenign,
+    key: 'ISIC_1028529',
+  },
 ];
 
 const HOST = 'https://melanoma-static.nbaron.com';
