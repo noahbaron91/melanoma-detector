@@ -90,10 +90,6 @@ const cases: Case[] = [
     trueLabel: Classification.Benign,
   },
   {
-    key: 'ISIC_2792717',
-    trueLabel: Classification.Malignant,
-  },
-  {
     key: 'ISIC_3640885',
     trueLabel: Classification.Benign,
   },
@@ -107,10 +103,6 @@ const cases: Case[] = [
   },
   {
     key: 'ISIC_6364782',
-    trueLabel: Classification.Malignant,
-  },
-  {
-    key: 'ISIC_6720909',
     trueLabel: Classification.Malignant,
   },
   {
@@ -434,7 +426,7 @@ function App() {
 
       <div className='flex flex-col sm:flex-row gap-5 sm:items-end justify-between mt-12'>
         <p className='text-gray-200 text-left sm:text-center'>
-          This model was trained using 100,000 images from the{' '}
+          This model was trained on 100,000 images from the{' '}
           <a
             href='https://www.isic-archive.com/'
             className='underline'
