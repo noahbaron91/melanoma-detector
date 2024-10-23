@@ -310,7 +310,13 @@ function App() {
 
   return (
     <div className='mx-7 my-7'>
-      <p className='text-white text-xl'>nbaron</p>
+      <a
+        href='https://nbaron.com'
+        target='_blank'
+        className='text-white text-xl'
+      >
+        nbaron
+      </a>
       <div className='flex flex-col gap-4 mt-16 md:gap-7'>
         <h1 className='text-3xl text-white sm:text-5xl font-semibold sm:text-center md:text-5xl max-w-[800px] !leading-[120%] sm:mx-auto'>
           Detecting Melanoma Skin Cancer With 99.73% Accuracy* Using Machine
