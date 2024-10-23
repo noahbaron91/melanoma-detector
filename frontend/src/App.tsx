@@ -392,10 +392,10 @@ function App() {
           </>
         ) : (
           <button
-            className='text-white bg-[#00277C] sm:max-w-72 sm:text-md mx-auto w-full py-3 rounded-3xl'
+            className='text-white bg-[#00277C] sm:max-w-72 sm:text-lg mx-auto w-full py-3 rounded-3xl'
             onClick={handleClickUploadImage}
           >
-            Upload test image
+            Upload image
           </button>
         )}
 
@@ -410,7 +410,8 @@ function App() {
             Test a sample image
           </p>
           <p className='text-center'>
-            Test our image using randomly selected images from{' '}
+            Test our machine learning model using randomly selected images from
+            the{' '}
             <a
               className='underline'
               href='https://isic-archive.com/'
@@ -418,7 +419,7 @@ function App() {
             >
               ISIC
             </a>{' '}
-            that were not included in the training set
+            dataset
           </p>
         </div>
         <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
@@ -433,7 +434,7 @@ function App() {
 
       <div className='flex flex-col sm:flex-row gap-5 sm:items-end justify-between mt-12'>
         <p className='text-gray-200 text-left sm:text-center'>
-          Model train on images the{' '}
+          This model was trained using 100,000 images from the{' '}
           <a
             href='https://www.isic-archive.com/'
             className='underline'

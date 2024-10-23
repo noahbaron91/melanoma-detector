@@ -1,5 +1,6 @@
-Each year 8,290 people die from Melanoma Skin Cancer
+The model was trained on the [ISIC dataset](https://www.isic-archive.com/) and uses the ResNet-50 pretrained model with transfer learning
 
-When detected early, the 5-year survival rate for Melanoma is 99 percent
-
-This model was built using the [ISIC dataset](https://www.isic-archive.com/) and trained using the ResNet architecture & PyTorch
+Technologies used:
+Frontend: React & Typescript
+Backend: Pyhton & Flask
+ML model: PyTorch
