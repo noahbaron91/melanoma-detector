@@ -232,15 +232,15 @@ function MelanomaSampleTest({ sampleCase }: { sampleCase: Case }) {
         <Dialog.Overlay className='fixed top-0 left-0 right-0 bottom-0 bg-black opacity-30' />
         <Dialog.Content
           aria-describedby={undefined}
-          className='px-10 py-10 fixed bg-[#003DC4] sm:max-w-sm sm:left-1/2 sm:-translate-x-1/2 flex flex-col gap-7 top-1/2 left-3 right-3 rounded-2xl text-white -translate-y-1/2'
+          className='px-10 py-10 fixed bg-[#003DC4] min-[400px]:max-w-sm min-[400px]:left-1/2 min-[400px]:-translate-x-1/2 flex flex-col gap-7 top-1/2 left-3 right-3 rounded-2xl text-white -translate-y-1/2'
         >
-          <div className='flex flex-col gap-4'>
-            <Dialog.Close>
-              <CloseIcon />
-            </Dialog.Close>
-            <Dialog.Title className='text-lg'>
+          <div className='flex items-center justify-between'>
+            <Dialog.Title className='text-xl'>
               Actual: {getShortLabelFromClassification(sampleCase.trueLabel)}{' '}
             </Dialog.Title>
+            <Dialog.Close className='pointer-events-none'>
+              <CloseIcon />
+            </Dialog.Close>
           </div>
           <img className='rounded w-full aspect-square' src={src} />
           <div className='flex flex-col'>
