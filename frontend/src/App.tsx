@@ -5,8 +5,8 @@ import * as Dialog from '@radix-ui/react-dialog';
 type Prediction =
   | 'Benign'
   | 'Malignant'
-  | 'Indeterminate / Benign (Follow up recommended)'
-  | 'Indeterminate / Malignant (Further testing recommended)';
+  | 'Indeterminate / Benign'
+  | 'Indeterminate / Malignant';
 
 enum Classification {
   Benign,
@@ -24,30 +24,10 @@ const getLabelFromClassification = (type: number): Prediction | null => {
       return 'Malignant';
     }
     case 2: {
-      return 'Indeterminate / Benign (Follow up recommended)';
+      return 'Indeterminate / Benign';
     }
     case 3: {
-      return 'Indeterminate / Malignant (Further testing recommended)';
-    }
-    default: {
-      return null;
-    }
-  }
-};
-
-const getShortLabelFromClassification = (type: number): string | null => {
-  switch (type) {
-    case 0: {
-      return 'Benign';
-    }
-    case 1: {
-      return 'Malignant';
-    }
-    case 2: {
-      return 'Indeterminate/Benign';
-    }
-    case 3: {
-      return 'Indeterminate/Malignant';
+      return 'Indeterminate / Malignant';
     }
     default: {
       return null;
@@ -97,10 +77,6 @@ type Case = {
 };
 
 const cases: Case[] = [
-  {
-    key: 'ISIC_0851414',
-    trueLabel: Classification.IndeterminateMalignant,
-  },
   {
     key: 'ISIC_1136887',
     trueLabel: Classification.Benign,
@@ -232,7 +208,7 @@ function MelanomaSampleTest({ sampleCase }: { sampleCase: Case }) {
         >
           <div className='flex items-center justify-between'>
             <Dialog.Title className='text-xl'>
-              Actual: {getShortLabelFromClassification(sampleCase.trueLabel)}{' '}
+              Actual: {getLabelFromClassification(sampleCase.trueLabel)}{' '}
             </Dialog.Title>
             <Dialog.Close className='pointer-events-none'>
               <CloseIcon />
@@ -319,8 +295,7 @@ function App() {
       </a>
       <div className='flex flex-col gap-4 mt-16 md:gap-7'>
         <h1 className='text-3xl text-white sm:text-5xl font-semibold sm:text-center md:text-5xl max-w-[800px] !leading-[120%] sm:mx-auto'>
-          Detecting Melanoma Skin Cancer With 99.73% Accuracy* Using Machine
-          Learning
+          Detecting Melanoma Skin Cancer Using Machine Learning
         </h1>
         <div className='flex flex-col gap-4 sm:text-center md:text-xl'>
           <p className='text-white'>
@@ -420,14 +395,15 @@ function App() {
 
       <div className='flex flex-col sm:flex-row gap-5 sm:items-end justify-between mt-12'>
         <p className='text-gray-200 text-left sm:text-center'>
-          *Accuracy based test on a test dataset of 10,000 test images from{' '}
+          Model train on images the{' '}
           <a
             href='https://www.isic-archive.com/'
             className='underline'
             target='_blank'
           >
             ISIC
-          </a>
+          </a>{' '}
+          dataset
         </p>
         <a
           target='_blank'
