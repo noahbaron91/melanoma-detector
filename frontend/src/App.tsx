@@ -400,14 +400,14 @@ function App() {
         )}
 
         <p className='text-gray-200 text-left sm:text-center max-w-[400px]'>
-          This is only for educational purposes, and should not be used as a
-          replacement for medical care
+          This is for educational purposes only and should not be used as a
+          substitute for professional medical care
         </p>
       </div>
       <div className='text-white flex flex-col mt-12 gap-3 lg:mx-36'>
         <div className='flex flex-col gap-3 my-3'>
           <p className='font-medium text-3xl text-center'>
-            Test a sample image
+            Test our model using a sample image
           </p>
           <p className='text-center'>
             Test our machine learning model using randomly selected images from
