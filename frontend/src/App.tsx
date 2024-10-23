@@ -35,6 +35,26 @@ const getLabelFromClassification = (type: number): Prediction | null => {
   }
 };
 
+const getShortLabelFromClassification = (type: number): string | null => {
+  switch (type) {
+    case 0: {
+      return 'Benign';
+    }
+    case 1: {
+      return 'Malignant';
+    }
+    case 2: {
+      return 'Indeterminate/Benign';
+    }
+    case 3: {
+      return 'Indeterminate/Malignant';
+    }
+    default: {
+      return null;
+    }
+  }
+};
+
 function GitHubIcon() {
   return (
     <svg
@@ -55,16 +75,16 @@ function GitHubIcon() {
 function CloseIcon() {
   return (
     <svg
-      width='28'
-      height='28'
-      viewBox='0 0 28 28'
+      width='24'
+      height='24'
+      viewBox='0 0 24 24'
       fill='none'
       xmlns='http://www.w3.org/2000/svg'
     >
       <path
-        fillRule='evenodd'
-        clipRule='evenodd'
-        d='M6.17374 6.17765C6.62935 5.72203 7.36804 5.72203 7.82366 6.17765L13.9987 12.3527L20.1737 6.17765C20.6294 5.72203 21.368 5.72203 21.8237 6.17765C22.2793 6.63326 22.2793 7.37195 21.8237 7.82756L15.6486 14.0026L21.8237 20.1776C22.2793 20.6333 22.2793 21.372 21.8237 21.8276C21.368 22.2832 20.6294 22.2832 20.1737 21.8276L13.9987 15.6525L7.82366 21.8276C7.36804 22.2832 6.62935 22.2832 6.17374 21.8276C5.71813 21.372 5.71813 20.6333 6.17374 20.1776L12.3488 14.0026L6.17374 7.82756C5.71813 7.37195 5.71813 6.63326 6.17374 6.17765Z'
+        fill-rule='evenodd'
+        clip-rule='evenodd'
+        d='M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z'
         fill='white'
       />
     </svg>
@@ -202,7 +222,11 @@ function MelanomaSampleTest({ sampleCase }: { sampleCase: Case }) {
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
-        <img src={src} className='aspect-square bg-gray-700' loading='eager' />
+        <img
+          src={src}
+          className='cursor-pointer aspect-square bg-gray-700 rounded-sm'
+          loading='eager'
+        />
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className='fixed top-0 left-0 right-0 bottom-0 bg-black opacity-30' />
@@ -210,13 +234,13 @@ function MelanomaSampleTest({ sampleCase }: { sampleCase: Case }) {
           aria-describedby={undefined}
           className='px-10 py-10 fixed bg-[#003DC4] sm:max-w-sm sm:left-1/2 sm:-translate-x-1/2 flex flex-col gap-7 top-1/2 left-3 right-3 rounded-2xl text-white -translate-y-1/2'
         >
-          <div className='flex justify-between items-center'>
-            <Dialog.Title className='text-xl'>
-              Actual: {getLabelFromClassification(sampleCase.trueLabel)}
-            </Dialog.Title>
+          <div className='flex flex-col gap-4'>
             <Dialog.Close>
               <CloseIcon />
             </Dialog.Close>
+            <Dialog.Title className='text-lg'>
+              Actual: {getShortLabelFromClassification(sampleCase.trueLabel)}{' '}
+            </Dialog.Title>
           </div>
           <img className='rounded w-full aspect-square' src={src} />
           <div className='flex flex-col'>
@@ -292,8 +316,8 @@ function App() {
     <div className='mx-7 my-7'>
       <p className='text-white text-xl'>nbaron</p>
       <div className='flex flex-col gap-4 mt-16 md:gap-7'>
-        <h1 className='text-4xl text-white sm:text-5xl font-semibold sm:text-center md:text-5xl'>
-          Using AI to Detect Skin Cancer
+        <h1 className='text-3xl text-white sm:text-5xl font-semibold sm:text-center md:text-5xl max-w-[600px] sm:mx-auto'>
+          Detecting Skin Cancer With Machine Learning
         </h1>
         <div className='flex flex-col gap-4 sm:text-center md:text-xl'>
           <p className='text-white'>
@@ -365,9 +389,11 @@ function App() {
         </p>
       </div>
       <div className='text-white flex flex-col mt-12 gap-3 lg:mx-36'>
-        <div className='flex flex-col gap-2 my-3'>
-          <p className='font-medium text-2xl'>Test a sample image</p>
-          <p>
+        <div className='flex flex-col gap-3 my-3'>
+          <p className='font-medium text-3xl text-center'>
+            Test a sample image
+          </p>
+          <p className='text-center'>
             Randomly selected images from{' '}
             <a
               className='underline'

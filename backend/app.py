@@ -29,7 +29,7 @@ def load_model():
     # Replace final layer
     model.fc = torch.nn.Linear(2048, 4)
     
-    model.load_state_dict(torch.load('./models/10k-images.pth', map_location=torch.device('cpu'), weights_only=True))
+    model.load_state_dict(torch.load('./models/100k-images.pth', map_location=torch.device('cpu'), weights_only=True))
     model.to(device)
     model.eval()
     
