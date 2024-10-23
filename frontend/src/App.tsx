@@ -122,10 +122,6 @@ const cases: Case[] = [
     trueLabel: Classification.Benign,
   },
   {
-    key: 'ISIC_4747370',
-    trueLabel: Classification.IndeterminateMalignant,
-  },
-  {
     key: 'ISIC_5574004',
     trueLabel: Classification.Benign,
   },
@@ -418,7 +414,7 @@ function App() {
 
       <div className='flex flex-col sm:flex-row gap-5 sm:items-end justify-between mt-12'>
         <p className='text-gray-200 text-left sm:text-center'>
-          *Accuracy based test dataset of 10,000 test images from{' '}
+          *Accuracy based test on a test dataset of 10,000 test images from{' '}
           <a
             href='https://www.isic-archive.com/'
             className='underline'
