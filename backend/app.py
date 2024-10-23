@@ -1,14 +1,25 @@
-from flask import Flask, request, jsonify
 import torch
 from torchvision.models import resnet50, ResNet50_Weights
 from PIL import Image
-from flask_cors import CORS
 import io
-import os
 import requests
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, File, UploadFile
+from pydantic import BaseModel
+from typing import Optional
 
-app = Flask(__name__)
-CORS(app)
+app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = None
@@ -37,87 +48,93 @@ def load_model():
 
 load_model()
 
-@app.route('/health')
+@app.get('/health')
 def health():
     return "OK", 200
+
+class PredictionResponse(BaseModel):
+    success: bool
+    classification: int
+    confidence: float
+    error_message: Optional[str] = None
+
+class ErrorResponse(BaseModel):
+    error: str
+    success: bool = False
+
  
-@app.route('/predict', methods=['POST'])
-def predict():
-    if request.method == 'POST':
-        print("0")
-
-        if 'image' not in request.files:
-            return jsonify({'error': 'No image provided'}), 400
-            
-        try:
-            # Read image
-            image_file = request.files['image']
-            image_bytes = image_file.read()
-            image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
-
-            # Preprocess
-            image_tensor = transform(image).unsqueeze(0).to(device)
-            
-            # Get prediction
-            with torch.no_grad():
-                outputs = model(image_tensor)
-                probabilities = torch.nn.functional.softmax(outputs, dim=1)
-                
-            pred_label_idx = torch.argmax(probabilities, dim=1).item()    
-            
-            return jsonify({
-                'classification': pred_label_idx,
-                'confidence': probabilities[0][pred_label_idx].item(),
-                'success': True
-            })
-            
-        except Exception as e:
-            print(e)
-            return jsonify({
-                'error': str(e),
-                'success': False
-            }), 500
-
-
-@app.route('/predict-url', methods=['POST'])
-def predict_url():
-    if request.method == 'POST':
-
-        if "url" not in request.json:
-            return jsonify({'error': 'No image URL provided', 'success': False}), 400
+@app.post('/predict')
+async def predict(image: UploadFile = File(...)):
+    if not image.content_type.startswith('image/'):
+        raise HTTPException(
+            status_code=400,
+            detail="File uploaded is not an image"
+        )
         
+    try:
+        # Read image
+        image_bytes = await image.read()
+        image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
+
+        # Preprocess
+        image_tensor = transform(image).unsqueeze(0).to(device)
         
-        url = request.json['url']
-
-        try:
-            # Download image from URL
-            response = requests.get(url, timeout=10)
-            response.raise_for_status()  # Raises an HTTPError for bad responses (4xx, 5xx)
-
-            image = Image.open(io.BytesIO(response.content)).convert('RGB')
+        # Get prediction
+        with torch.no_grad():
+            outputs = model(image_tensor)
+            probabilities = torch.nn.functional.softmax(outputs, dim=1)
             
-            # Preprocess
-            image_tensor = transform(image).unsqueeze(0).to(device)
-            
-            # Get prediction
-            with torch.no_grad():
-                outputs = model(image_tensor)
-                probabilities = torch.nn.functional.softmax(outputs, dim=1)
-                
-            pred_label_idx = torch.argmax(probabilities, dim=1).item()    
-            
-            return jsonify({
-                'classification': pred_label_idx,
-                'confidence': probabilities[0][pred_label_idx].item(),
-                'success': True
-            })
-            
+        pred_label_idx = torch.argmax(probabilities, dim=1).item()    
+        
+        return PredictionResponse(
+            classification=pred_label_idx,
+            confidence=float(probabilities[0][pred_label_idx].item()),
+            success=True
+        )
+        
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
 
-        except:
-            return jsonify({'error': 'Could not download image from URL', 'success': False}), 400
+class ImageURL(BaseModel):
+    url: str
 
+@app.post('/predict-url')
+async def predict_url(image_data: ImageURL):
+    try:
+        # Download image from URL
+        response = requests.get(image_data.url, timeout=10)
+        response.raise_for_status()
 
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8080))
-    app.run(host='0.0.0.0', port=port)
-    
+        # Open and convert image
+        image = Image.open(io.BytesIO(response.content)).convert('RGB')
+        
+        # Preprocess
+        image_tensor = transform(image).unsqueeze(0).to(device)
+        
+        # Get prediction
+        with torch.no_grad():
+            outputs = model(image_tensor)
+            probabilities = torch.nn.functional.softmax(outputs, dim=1)
+            
+        pred_label_idx = torch.argmax(probabilities, dim=1).item()
+        
+        return PredictionResponse(
+            classification=pred_label_idx,
+            confidence=probabilities[0][pred_label_idx].item(),
+            success=True
+        )
+
+    except requests.RequestException:
+        raise HTTPException(
+            status_code=400,
+            detail="Could not download image from URL"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error processing image: {str(e)}"
+        )
